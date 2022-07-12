@@ -1,28 +1,8 @@
 let email = document.getElementById("exampleInputEmail1")
-let pn = document.getElementById("phoneNumber")
 let password = document.getElementById("exampleInputPassword1")
 let confirmPassword = document.getElementById("exampleInputConfirmPassword1")
-let error = document.getElementById("error")
-let errorEmail = document.getElementById("errorEmail")
-let errorPassword = document.getElementById("errorPassword")
-let errorPhoneNumber = document.getElementById("errorPhoneNumber")
-let errorConfirmPassword = document.getElementById("errorConfirmPassword")
 
-
-// let password = document.getElementById("password")
-
-function  validateEmail() {
-    let regexp = /^([a-zA-Z0-9\.\-]+)@([A-za-z0-9\-]+)\.([a-z]{2,3})(.[a-z]{2,3})?$/
-    if(regexp.test(email.value)){
-        errorEmail.innerHTML = "Email is valid"
-        errorEmail.style.color = "green"
-        return true;
-    } else {
-        errorEmail.innerHTML = "Email is invalid"
-        errorEmail.style.color = "red"
-        return false;
-    }
-}
+var maxTodos = 0
 
 function validateLogin() {
     var a = false
@@ -49,126 +29,87 @@ function validateLogin() {
 
     console.log("validateLogin ===", a)
     return a
-    /*let regexp = /^([a-zA-Z0-9\.\-]+)@([A-za-z0-9\-]+)\.([a-z]{2,3})(.[a-z]{2,3})?$/
-    if(regexp.test(email.value)){
-        errorEmail.innerHTML = "Email is valid"
-        errorEmail.style.color = "green"
-        return true;
-    } else {
-        errorEmail.innerHTML = "Email is invalid"
-        errorEmail.style.color = "red"
-        return false;
-    }*/
 }
 
-function  validatePhoneNumber() {
-    let regexpn= /^\d{10}$/;
-    let regexpnHyphen = /(^\d{3})[-](\d{3})[-](\d{4})$/
-    let regexpnDot = /(^\d{3})[.](\d{3})[.](\d{4})$/
-    let regexpnSpace = /(^\d{3})[\s](\d{3})[\s](\d{4})$/
-    if(regexpn.test(pn.value) || regexpnHyphen.test(pn.value) || regexpnDot.test(pn.value) || regexpnSpace.test(pn.value)) {
-        var pnNew = pn.value.replace(/[^0-9]/g, '');
-        if (pnNew.length == 10) {
-            errorPhoneNumber.innerHTML = "Phone number is valid"
-            errorPhoneNumber.style.color = "green"
-            return true;
+const api_url =
+    "https://jsonplaceholder.typicode.com/todos";
+
+// Defining async function
+async function getapi(url) {
+
+    // Storing response
+    const response = await fetch(url);
+
+    // Storing data in form of JSON
+    var data = await response.json();
+    console.log(data);
+    if (response) {
+        hideloader();
+    }
+    show(data);
+}
+// Calling that async function
+getapi(api_url);
+
+// Function to hide the loader
+function hideloader() {
+    document.getElementById('loading').style.display = 'none';
+}
+// Function to define innerHTML for HTML table
+function show(data) {
+    let tab =
+        `<tr>
+          <th>UserId</th>
+          <th>Id</th>
+          <th>Title</th>
+          <th>Completed</th>
+         </tr>`;
+
+    // Loop to access all rows
+    for(var i = 0; i < data.length; i++) {
+        //for (let r of data.length) {
+        if (data[i].completed == true) {
+            console.log("Inside if")
+    tab += `<tr> 
+        <td>${data[i].userId} </td>
+        <td>${data[i].id}</td>
+        <td>${data[i].title}</td> 
+        <td><input type="checkbox" checked disabled onchange="validateMaxTodos()"></td>          
+    </tr>`;
         } else {
-            errorPhoneNumber.innerHTML = "Phone number is invalid"
-            errorPhoneNumber.style.color = "red"
-            return false;
+            console.log("Inside else")
+    tab += `<tr> 
+    <td>${data[i].userId} </td>
+    <td>${data[i].id}</td>
+    <td>${data[i].title}</td> 
+    <td><input type="checkbox" onchange="validateMaxTodos()"></td>          
+    </tr>`;
         }
     }
-    else {
-        errorPhoneNumber.innerHTML = "Phone number is invalid"
-        errorPhoneNumber.style.color = "red"
-        return false;
-    }
+
+    // Setting innerHTML as tab variable
+    document.getElementById("todos").innerHTML = tab;
 }
 
-function  validatePassword() {
-    var ctr = 0;
-    var str = password.value
-    if(str.match(/[a-z]/g)) {
-        ctr++
-    }
-    if(str.match(
-        /[A-Z]/g)) {
-        ctr++
-    }
-    if (str.match(
-        /[0-9]/g)) {
-        ctr++
-    }
-    if(str.length >= 8){
-        ctr++
-    }
+function validateMaxTodos(){
+    maxTodos++
+    console.log("maxTodos==",maxTodos)
+    var promise = new Promise(function (resolve, reject) {
+        if(maxTodos == 5){
+            console.log("Inside if loop in validateMaxTodos function")
+            resolve("true")
+        } else {
+            console.log("Inside else loop in validateMaxTodos function")
+            reject("false")
+        }
+    })
 
-    switch (ctr) {
-        case 0:
-            strength = "Password is invalid";
-            color = "red";
-            break;
-        case 1:
-            strength = "Poor";
-            color = "red";
-            break;
-        case 2:
-            strength = "Medium";
-            color = "orange";
-            break;
-        case 3:
-            strength = "Medium";
-            color = "orange";
-            break;
-        case 4:
-            strength = "Strong";
-            color = "green";
-            break;
-    }
-    errorPassword.innerHTML = strength;
-    errorPassword.style.color = color;
-
-    if(ctr == 4) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-function validateConfirmPassword() {
-    if(password.value == confirmPassword.value) {
-        errorConfirmPassword.innerHTML = "Password is matching"
-        errorConfirmPassword.style.color = "green"
-        return true;
-    } else {
-        errorConfirmPassword.innerHTML = "Password is not matching"
-        errorConfirmPassword.style.color = "red"
-        return false;
-    }
+    promise.then(function (s){
+        console.log("Inside promise resolve")
+        alert("Congrats. 5 Tasks have been Successfully Completed")
+    }).catch(function (e){
+        console.log("Inside promise reject")
+    })
 
 }
 
-function validateAll(){
-    if(validateEmail() && validatePhoneNumber() && validatePassword() && validateConfirmPassword()) {
-        error.innerHTML = "Valid"
-        error.style.color = "green"
-        return true;
-    } else {
-        error.innerHTML = "Invalid enteries"
-        error.style.color = "red"
-        return false;
-    }
-}
-
-
-/*function validateEmail(){
-    if(validateEmail()) {
-        error.innerHTML = "Valid"
-        error.style.color = "green"
-        return true;
-    } else {
-        error.innerHTML = "Invalid enteries"
-        error.style.color = "red"
-        return false;
-    }
-}*/
